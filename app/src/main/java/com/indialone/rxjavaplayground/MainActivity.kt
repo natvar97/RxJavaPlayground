@@ -56,27 +56,12 @@ class MainActivity : AppCompatActivity() {
         // first create observable
         // we can map the observable using map operator
 
-        val observable = Observable.range(1, 5)
-            .doOnNext {
-                Log.d(TAG, "range(): $it")
-            }
-            .map {
-                it * 2
-            }
-            .doOnNext {
-                Log.d(TAG, "map(): $it")
-            }
-            .filter {
-                it < 8
-            }
-            .doOnNext {
-                Log.d(TAG, "filter(): $it")
-            }
-            .subscribe()
-
-
     }
 
+    private fun print(message: String) {
+        val threadName = Thread.currentThread().name
+        Log.d(TAG, "$message : thread name: $threadName")
+    }
 
 }
 
@@ -396,5 +381,71 @@ class MainActivity : AppCompatActivity() {
                 map(): 8
                 range(): 5
                 map(): 10
+
+ */
+
+/*
+        ** cache() method
+
+        val appSettingsObservable = Observable
+            .fromCallable {
+                Log.d(TAG, "This is the App settings")
+            }
+            .timestamp().cache()
+
+        appSettingsObservable
+            .subscribe { result ->
+                Log.d(TAG, "this is the foreground first observer: ${result.time()}")
+            }
+
+        appSettingsObservable
+            .subscribe { result ->
+                Log.d(TAG, "this is cached: ${result.time()}")
+            }
+
+            ** output **
+        D/MainActivity: This is the App settings
+            this is the foreground first observer 1627533917206
+            this is after time completed 1627533917206
+
+ */
+
+/*
+
+    val observable: Observable<Int> = Observable
+                .create {
+                    print("In Subscribe!!")
+                    it.onNext(1)
+                    it.onNext(2)
+                    it.onNext(3)
+                    it.onComplete()
+                }
+
+            observable.subscribeOn(Schedulers.computation())
+                .doOnNext { print("value1: $it") }
+                .observeOn(Schedulers.newThread())
+                .doOnNext { print("value2: $it") }
+                .observeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.newThread())        // no impact on anything
+                .doOnNext { print("value4: $it") }
+                .observeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { print("value5 : $it") }
+
+    ** output **
+    D/MainActivity: In Subscribe!! : thread name: RxComputationThreadPool-1
+        value1: 1 : thread name: RxComputationThreadPool-1
+        value1: 2 : thread name: RxComputationThreadPool-1
+    D/MainActivity: value1: 3 : thread name: RxComputationThreadPool-1
+    D/MainActivity: value2: 1 : thread name: RxNewThreadScheduler-2
+    D/MainActivity: value2: 2 : thread name: RxNewThreadScheduler-2
+        value2: 3 : thread name: RxNewThreadScheduler-2
+    D/MainActivity: value4: 1 : thread name: RxNewThreadScheduler-3
+    D/MainActivity: value4: 2 : thread name: RxNewThreadScheduler-3
+        value4: 3 : thread name: RxNewThreadScheduler-3
+    D/MainActivity: value5 : 1 : thread name: main
+        value5 : 2 : thread name: main
+    D/MainActivity: value5 : 3 : thread name: main
+
 
  */
